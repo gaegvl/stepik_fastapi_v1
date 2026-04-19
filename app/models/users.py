@@ -2,6 +2,13 @@ from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.products import Product
+    from app.models.reviews import Review
+    from app.models.cart_items import CartItem
+    from app.models.orders import Order
 
 
 class User(Base):
@@ -15,4 +22,11 @@ class User(Base):
 
     products: Mapped[list["Product"]] = relationship("Product", back_populates="seller")
 
-    reviews:Mapped[list["Review"]] = relationship("Review", back_populates="user")
+    reviews: Mapped[list["Review"]] = relationship("Review", back_populates="user")
+
+    cart_items: Mapped[list["CartItem"]] = relationship(
+        "CartItem", back_populates="user", cascade="all, delete-orphan"
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        "Order", back_populates="user", cascade="all, delete-orphan"
+    )

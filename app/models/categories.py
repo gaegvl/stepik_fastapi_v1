@@ -1,18 +1,30 @@
-from sqlalchemy import  String, Boolean, Integer, ForeignKey
+from sqlalchemy import String, Boolean, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.products import Product
 
 
 class Category(Base):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name:Mapped[str] = mapped_column(String(50), nullable=False)
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    products:Mapped[list["Product"]] = relationship("Product", back_populates="category")
+    products: Mapped[list["Product"]] = relationship(
+        "Product", back_populates="category"
+    )
 
-    parent_id:Mapped[int|None] = mapped_column(Integer, ForeignKey("categories.id"), nullable=True)
-    parent:Mapped["Category|None"] = relationship("Category", back_populates="children", remote_side="Category.id")
-    children:Mapped["Category|None"] = relationship("Category", back_populates="parent")
+    parent_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("categories.id"), nullable=True
+    )
+    parent: Mapped["Category|None"] = relationship(
+        "Category", back_populates="children", remote_side="Category.id"
+    )
+    children: Mapped["Category|None"] = relationship(
+        "Category", back_populates="parent"
+    )
