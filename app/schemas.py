@@ -1,5 +1,5 @@
 import datetime
-from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from pydantic import BaseModel, Field, ConfigDict, EmailStr, field_validator
 from decimal import Decimal
 
 
@@ -8,9 +8,16 @@ class CategoryCreate(BaseModel):
     Модель для создания и обновления категории.
     Используется в POST и PUT запросах.
     """
-    name: str = Field(..., min_length=3, max_length=50,
-                      description="Название категории (3-50 символов)")
-    parent_id: int | None = Field(None, description="ID родительской категории, если есть")
+
+    name: str = Field(
+        ...,
+        min_length=3,
+        max_length=50,
+        description="Название категории (3-50 символов)",
+    )
+    parent_id: int | None = Field(
+        None, description="ID родительской категории, если есть"
+    )
 
 
 class Category(BaseModel):
@@ -18,9 +25,12 @@ class Category(BaseModel):
     Модель для ответа с данными категории.
     Используется в GET-запросах.
     """
+
     id: int = Field(..., description="Уникальный идентификатор категории")
     name: str = Field(..., description="Название категории")
-    parent_id: int | None = Field(None, description="ID родительской категории, если есть")
+    parent_id: int | None = Field(
+        None, description="ID родительской категории, если есть"
+    )
     is_active: bool = Field(..., description="Активность категории")
 
     model_config = ConfigDict(from_attributes=True)
@@ -31,13 +41,25 @@ class ProductCreate(BaseModel):
     Модель для создания и обновления товара.
     Используется в POST и PUT запросах.
     """
-    name: str = Field(..., min_length=3, max_length=100,
-                      description="Название товара (3-100 символов)")
-    description: str | None = Field(None, max_length=500,
-                                       description="Описание товара (до 500 символов)")
-    price: Decimal = Field(..., gt=0, description="Цена товара (больше 0)", decimal_places=2)
-    image_url: str | None = Field(None, max_length=200, description="URL изображения товара")
-    stock: int = Field(..., ge=0, description="Количество товара на складе (0 или больше)")
+
+    name: str = Field(
+        ...,
+        min_length=3,
+        max_length=100,
+        description="Название товара (3-100 символов)",
+    )
+    description: str | None = Field(
+        None, max_length=500, description="Описание товара (до 500 символов)"
+    )
+    price: Decimal = Field(
+        ..., gt=0, description="Цена товара (больше 0)", decimal_places=2
+    )
+    image_url: str | None = Field(
+        None, max_length=200, description="URL изображения товара"
+    )
+    stock: int = Field(
+        ..., ge=0, description="Количество товара на складе (0 или больше)"
+    )
     category_id: int = Field(..., description="ID категории, к которой относится товар")
 
 
@@ -46,23 +68,30 @@ class Product(BaseModel):
     Модель для ответа с данными товара.
     Используется в GET-запросах.
     """
+
     id: int = Field(..., description="Уникальный идентификатор товара")
     name: str = Field(..., description="Название товара")
     description: str | None = Field(None, description="Описание товара")
-    price: Decimal = Field(..., description="Цена товара в рублях", gt=0, decimal_places=2)
+    price: Decimal = Field(
+        ..., description="Цена товара в рублях", gt=0, decimal_places=2
+    )
     image_url: str | None = Field(None, description="URL изображения товара")
     stock: int = Field(..., description="Количество товара на складе")
     category_id: int = Field(..., description="ID категории")
     is_active: bool = Field(..., description="Активность товара")
-    rating: float = Field(ge=1, le=5, description="Рейтинг товара")
+    rating: float = Field(ge=0, le=5, description="Рейтинг товара")
 
     model_config = ConfigDict(from_attributes=True)
 
-    
+
 class UserCreate(BaseModel):
     email: EmailStr = Field(description="Email пользователя")
     password: str = Field(min_length=8, description="Пароль (минимум 8 символов)")
-    role: str = Field(default="buyer", pattern="^(buyer|seller|admin)$", description="Роль: 'buyer' или 'seller' или 'admin'")
+    role: str = Field(
+        default="buyer",
+        pattern="^(buyer|seller|admin)$",
+        description="Роль: 'buyer' или 'seller' или 'admin'",
+    )
 
 
 class User(BaseModel):
@@ -72,20 +101,132 @@ class User(BaseModel):
     role: str
     model_config = ConfigDict(from_attributes=True)
 
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
 
+
 class ReviewCreate(BaseModel):
-    comment: str|None = Field(None, max_length=500, description="Комментарий к отзыву (до 500 символов)")
-    grade: int = Field(..., ge=1, le=5, description="Оценка (1-5)")
-    product_id:int = Field(..., description="ID товара, к которому относится отзыв")
-    
+    comment: str | None = Field(
+        None, max_length=500, description="Комментарий к отзыву (до 500 символов)"
+    )
+    grade: int = Field(..., ge=0, le=5, description="Оценка (0-5)")
+    product_id: int = Field(..., description="ID товара, к которому относится отзыв")
+
 
 class Review(ReviewCreate):
-    id:int = Field(..., description="Уникальный идентификатор отзыва")
-    user_id:int = Field(..., description="ID пользователя, оставившего отзыв")
-    product_id:int = Field(..., description="ID товара, к которому относится отзыв")
-    comment_date:datetime.datetime = Field(..., description="Дата и время остановки отзыва")
-    is_active:bool = Field(default=True, description="Активность отзыва")
+    id: int = Field(..., description="Уникальный идентификатор отзыва")
+    user_id: int = Field(..., description="ID пользователя, оставившего отзыв")
+    product_id: int = Field(..., description="ID товара, к которому относится отзыв")
+    comment_date: datetime.datetime = Field(
+        ..., description="Дата и время остановки отзыва"
+    )
+    is_active: bool = Field(default=True, description="Активность отзыва")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductList(BaseModel):
+    items: list[Product] = Field(..., description="Список товаров")
+    total: int = Field(ge=0, description="Общее количество товаров")
+    page: int = Field(ge=1, description="Номер страницы")
+    page_size: int = Field(ge=1, description="Размер страницы")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductFilter(BaseModel):
+    category_id: int | None = Field(None, description="ID категории для фильтрации")
+    min_price: float | None = Field(None, ge=0, description="Минимальная цена товара")
+    max_price: float | None = Field(None, ge=0, description="Максимальная цена товара")
+    in_stock: bool | None = Field(
+        None, description="true — только товары в наличии, false — только без остатка"
+    )
+    seller_id: int | None = Field(None, description="ID продавца для фильтрации")
+    created_at: datetime.datetime | None = Field(
+        None, description="Дата создания товара"
+    )
+
+    @field_validator(
+        "category_id",
+        "min_price",
+        "max_price",
+        "seller_id",
+        "created_at",
+        mode="before",
+    )
+    @classmethod
+    def empty_str_to_none(cls, v):
+        if v == "" or v is None:
+            return None
+        return v
+
+
+class CartItemBase(BaseModel):
+    product_id: int = Field(..., description="ID товара")
+    quantity: int = Field(..., ge=1, description="Количество товара (больше 1)")
+
+
+class CartItemCreate(CartItemBase):
+    pass
+
+
+class CartItemUpdate(BaseModel):
+    quantity: int = Field(..., ge=1, description="Количество товара (больше 1)")
+
+
+class CartItem(BaseModel):
+    id: int = Field(..., description="Уникальный идентификатор товара в корзине")
+    quantity: int = Field(..., ge=1, description="Количество товара (больше 1)")
+    product: Product = Field(..., description="Товар")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Cart(BaseModel):
+    user_id: int = Field(..., description="ID пользователя")
+    items: list[CartItem] = Field(
+        default_factory=list, description="Список товаров в корзине"
+    )
+    total_quantity: int = Field(
+        ..., ge=0, description="Общее количество товаров в корзине"
+    )
+    total_price: Decimal = Field(..., ge=0, description="Общая цена товаров в корзине")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class OrderItem(BaseModel):
+    id: int = Field(..., description="ID позиции заказа")
+    product_id: int = Field(..., description="ID товара")
+    quantity: int = Field(..., ge=1, description="Количество")
+    unit_price: Decimal = Field(
+        ..., ge=0, description="Цена за единицу на момент покупки"
+    )
+    total_price: Decimal = Field(..., ge=0, description="Сумма по позиции")
+    product: Product | None = Field(None, description="Полная информация о товаре")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class Order(BaseModel):
+    id: int = Field(..., description="ID заказа")
+    user_id: int = Field(..., description="ID пользователя")
+    status: str = Field(..., description="Текущий статус заказа")
+    total_amount: Decimal = Field(..., ge=0, description="Общая стоимость")
+    created_at: datetime.datetime = Field(..., description="Когда заказ был создан")
+    updated_at: datetime.datetime = Field(
+        ..., description="Когда последний раз обновлялся"
+    )
+    items: list[OrderItem] = Field(default_factory=list, description="Список позиций")
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class OrderList(BaseModel):
+    items: list[Order] = Field(..., description="Заказы на текущей странице")
+    total: int = Field(ge=0, description="Общее количество заказов")
+    page: int = Field(ge=1, description="Текущая страница")
+    page_size: int = Field(ge=1, description="Размер страницы")
 
     model_config = ConfigDict(from_attributes=True)
